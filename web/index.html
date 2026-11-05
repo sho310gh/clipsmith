@@ -1,0 +1,549 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ClipSmith</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M16 2l3.5 10.5L30 16l-10.5 3.5L16 30l-3.5-10.5L2 16l10.5-3.5z' fill='%23ff8a3d'/%3E%3C/svg%3E">
+<style>
+:root{--bg:#0a0c11;--panel:#12151d;--panel2:#181c27;--line:#252b3b;--line2:#323a50;--text:#e9ecf4;--muted:#8d97ad;--ember:#ff8a3d;--ember2:#ffc15e;--ok:#4ade80;--warn:#fbbf24;--err:#f87171;--r:12px}
+*{box-sizing:border-box}
+html{color-scheme:dark}
+body{margin:0;background:radial-gradient(1100px 500px at 85% -10%,#2a1a10 0,transparent 60%),var(--bg);color:var(--text);font:15px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;min-height:100vh}
+header{display:flex;align-items:center;gap:12px;padding:14px 24px;border-bottom:1px solid var(--line);background:#0a0c11cc;backdrop-filter:blur(8px);position:sticky;top:0;z-index:5}
+.logo{display:flex;align-items:center;gap:10px;font-weight:700;font-size:19px;letter-spacing:.2px}
+.logo svg{width:26px;height:26px;filter:drop-shadow(0 0 8px #ff8a3d88)}
+.logo small{font-weight:400;color:var(--muted);font-size:12px;margin-left:4px}
+#hdrProject{margin-left:auto;display:flex;align-items:center;gap:10px;color:var(--muted);font-size:13px}
+#hdrProject b{color:var(--text)}
+.shell{display:grid;grid-template-columns:210px minmax(0,1fr) 330px;gap:22px;max-width:1380px;margin:0 auto;padding:22px 24px 90px}
+.shell.noaside{grid-template-columns:210px minmax(0,1fr)}
+.shell.noaside aside{display:none}
+@media(max-width:1100px){.shell,.shell.noaside{grid-template-columns:1fr}nav#steps{flex-direction:row;overflow-x:auto}nav#steps .st{flex:none}}
+nav#steps{display:flex;flex-direction:column;gap:4px;align-self:start;position:sticky;top:78px}
+.st{display:flex;align-items:center;gap:11px;padding:10px 12px;border-radius:10px;cursor:pointer;color:var(--muted);border:1px solid transparent;background:none;font:inherit;text-align:left}
+.st .n{width:26px;height:26px;border-radius:50%;border:1px solid var(--line2);display:grid;place-items:center;font-size:12px;flex:none}
+.st:hover:not(:disabled){color:var(--text);background:var(--panel)}
+.st.on{color:var(--text);background:var(--panel);border-color:var(--line)}
+.st.on .n{background:linear-gradient(135deg,var(--ember),var(--ember2));color:#1a0e05;border-color:transparent;font-weight:700}
+.st.done .n{border-color:#166534;color:var(--ok)}
+.st:disabled{opacity:.35;cursor:not-allowed}
+h2{font-size:22px;margin:0 0 4px;letter-spacing:.2px}
+.lead{color:var(--muted);margin:0 0 18px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:18px;margin-bottom:16px}
+.card h3{font-size:14px;margin:0 0 12px;color:var(--ember2);text-transform:uppercase;letter-spacing:.8px;font-weight:600}
+.row{display:flex;flex-wrap:wrap;gap:12px;align-items:end}
+.field{display:flex;flex-direction:column;gap:5px;min-width:130px}
+.field>label,.lbl{font-size:12px;color:var(--muted)}
+input,select,button{font:inherit;color:var(--text)}
+input[type=text],input[type=password],input[type=number],select{background:var(--panel2);border:1px solid var(--line);border-radius:9px;padding:9px 11px;min-width:0;outline:none}
+input:focus,select:focus{border-color:var(--ember)}
+input[type=file]{color:var(--muted);max-width:280px;font-size:13px}
+input[type=color]{width:46px;height:34px;padding:2px;border:1px solid var(--line);border-radius:8px;background:var(--panel2)}
+input[type=range]{width:100%;accent-color:var(--ember)}
+input[type=checkbox]{width:18px;height:18px;accent-color:var(--ember)}
+input:disabled,select:disabled,button:disabled{opacity:.5;cursor:not-allowed}
+button{background:var(--panel2);border:1px solid var(--line2);border-radius:9px;padding:9px 15px;cursor:pointer}
+button:hover:not(:disabled){border-color:#4a5575}
+button.primary{background:linear-gradient(135deg,var(--ember),#ff6a1f);border-color:transparent;color:#1a0e05;font-weight:700}
+button.primary:hover:not(:disabled){filter:brightness(1.08)}
+button.danger{border-color:#7f1d1d;color:var(--err)}
+button.ghost{background:none}
+.hidden{display:none!important}
+.note{color:var(--muted);font-size:12px;margin-top:6px}
+.nav{display:flex;justify-content:space-between;margin-top:6px}
+.ctl{display:grid;grid-template-columns:150px 1fr 46px;gap:10px;align-items:center;margin-bottom:9px}
+.ctl.check,.ctl.sel,.ctl.col{grid-template-columns:150px 1fr}
+.ctl .val{font-size:12px;color:var(--muted);text-align:right}
+.ctl .lbl{font-size:13px}
+.formats{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.fmt{border:2px solid var(--line);border-radius:11px;padding:11px;cursor:pointer;display:flex;gap:13px;align-items:center;background:var(--panel2)}
+.fmt input{display:none}
+.fmt.sel{border-color:var(--ember);box-shadow:0 0 0 3px #ff8a3d22}
+.fmt b{display:block}
+.fmt small{color:var(--muted)}
+.ph{width:38px;height:68px;border-radius:6px;flex:none;position:relative;overflow:hidden}
+.ph.fill{background:linear-gradient(135deg,#6d8f3a,#8b6b3a)}
+.ph.fit{background:#2c4561}
+.ph.fit::after{content:"";position:absolute;left:0;right:0;top:36%;height:28%;background:linear-gradient(135deg,#6d8f3a,#8b6b3a)}
+.ph::before{content:"";position:absolute;left:5px;right:5px;bottom:11%;height:5px;background:#fff;border-radius:2px;z-index:2}
+aside{position:sticky;top:78px;align-self:start}
+.phone{border:7px solid #1d2232;border-radius:34px;background:#000;overflow:hidden;box-shadow:0 20px 60px #000a,0 0 0 1px var(--line)}
+#preview{width:100%;aspect-ratio:9/16;object-fit:contain;display:block;background:#000}
+#preview.busy{opacity:.5}
+.fxgrid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:1300px){.fxgrid{grid-template-columns:1fr}}
+.fx{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:15px}
+.fx.on{border-color:#6b3d1c;background:linear-gradient(180deg,#1b1511,var(--panel))}
+.fxh{display:flex;align-items:flex-start;gap:12px;margin-bottom:6px;cursor:pointer}
+.fxh input{margin-top:3px;flex:none}
+.fxh b{display:block;font-size:15px}
+.fxh span{color:var(--muted);font-size:12.5px}
+.fx .sub{margin-top:12px}
+.fx:not(.on) .sub{opacity:.4;pointer-events:none}
+.steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:9px;margin:14px 0}
+.step{background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:9px 11px;font-size:13px}
+.step .nm{font-weight:600}
+.step .m{color:var(--muted);font-size:12px;min-height:17px;overflow-wrap:anywhere}
+.step.done{border-color:#166534}.step.done .nm::before{content:"\2713  ";color:var(--ok)}
+.step.running{border-color:var(--warn)}.step.running .nm::before{content:"\25B6  ";color:var(--warn)}
+.step.error{border-color:#7f1d1d}.step.error .m{color:var(--err)}
+.bar{height:8px;background:var(--panel2);border-radius:5px;overflow:hidden}
+.bar i{display:block;height:100%;background:linear-gradient(90deg,var(--ember),var(--ember2));width:0;transition:width .4s}
+.shorts{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:15px}
+.short{background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:11px}
+.short h4{font-size:14px;margin:0 0 2px}
+.meta{font-size:12px;color:var(--muted);margin-bottom:6px}
+.chip{display:inline-block;font-size:11px;border:1px solid #6b3d1c;color:var(--ember2);border-radius:10px;padding:1px 8px;margin-bottom:6px}
+.short video{width:100%;aspect-ratio:9/16;background:#000;border-radius:9px}
+.why{font-size:12px;color:var(--muted);margin:6px 0}
+.acts{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.acts a,.acts button{font-size:12px;padding:5px 10px;border-radius:8px;border:1px solid var(--line2);background:var(--panel);color:var(--text);text-decoration:none;cursor:pointer}
+.acts a:hover,.acts button:hover{border-color:var(--ember)}
+.badges span{font-size:11px;border:1px solid var(--line);border-radius:10px;padding:1px 7px;margin-right:4px;color:var(--muted)}
+.badges span.done{color:var(--ok);border-color:#166534}
+#toast{position:fixed;left:50%;transform:translateX(-50%);bottom:22px;background:#0f1320;border:1px solid var(--line2);padding:11px 17px;border-radius:10px;max-width:90vw;z-index:9;display:none;box-shadow:0 10px 40px #000a}
+#toast.err{border-color:#7f1d1d;color:var(--err)}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">
+    <svg viewBox="0 0 32 32"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffc15e"/><stop offset="1" stop-color="#ff6a1f"/></linearGradient></defs><path d="M16 2l3.5 10.5L30 16l-10.5 3.5L16 30l-3.5-10.5L2 16l10.5-3.5z" fill="url(#g)"/></svg>
+    ClipSmith <small>long video &rarr; viral shorts</small>
+  </div>
+  <div id="hdrProject" class="hidden"><span><b id="hdrName"></b></span><button class="ghost" id="btnClose">Close project</button></div>
+</header>
+
+<div class="shell" id="shell">
+  <nav id="steps"></nav>
+
+  <main>
+    <!-- 1 SOURCE -->
+    <section class="panel" data-p="1">
+      <h2>Source</h2><p class="lead">Start a new project or pick up where you left off.</p>
+      <div class="card" id="newBox">
+        <h3>New project</h3>
+        <div class="row">
+          <div class="field"><label>Project name</label><input type="text" id="pName" placeholder="e.g. Wyrdcraft ep 12"></div>
+          <div class="field"><label>Video file (upload)</label><input type="file" id="pFile" accept="video/*"></div>
+          <div class="field" style="flex:1;min-width:240px"><label>&hellip;or path to a file on this computer (no copy, best for big videos)</label><input type="text" id="pPath" placeholder="C:\Videos\episode12.mp4"></div>
+          <button class="primary" id="btnCreate">Create project</button>
+        </div>
+      </div>
+      <div class="card" id="resumeBox">
+        <h3>Resume a project</h3>
+        <div class="row">
+          <div class="field" style="min-width:280px"><label>Saved projects</label><select id="projList"></select></div>
+          <button id="btnOpenList">Open</button>
+          <div class="field"><label>&hellip;or choose its project.json</label><input type="file" id="pJson" accept=".json"></div>
+        </div>
+      </div>
+      <div class="card hidden" id="currentBox">
+        <h3>Current project</h3>
+        <b id="curName"></b><div class="note" id="curInfo"></div>
+        <div class="nav"><span></span><button class="primary" data-go="2">Next: Shorts &rarr;</button></div>
+      </div>
+    </section>
+
+    <!-- 2 SHORTS -->
+    <section class="panel hidden" data-p="2">
+      <h2>Shorts</h2><p class="lead">How many shorts, how long, and what they look like.</p>
+      <div class="card">
+        <h3>AI</h3>
+        <div class="row">
+          <div class="field"><label>Gemini API key (saved on this computer)</label><input type="password" id="apiKey" autocomplete="off" placeholder="AIza..."></div>
+          <button id="btnModels">Load models</button>
+          <div class="field"><label>Gemini model</label><select id="model" data-s="gemini_model"></select></div>
+          <button class="ghost" id="btnForget" title="Remove the saved key">Forget key</button>
+        </div>
+        <div class="note">Free key tip: gemini-3.8-flash. Your video's speech is transcribed locally; only the text goes to Gemini.</div>
+      </div>
+      <div class="card">
+        <h3>Amount and length</h3>
+        <div class="row">
+          <div class="field"><label>Number of shorts</label><input type="number" data-s="count" min="1" max="30"></div>
+          <div class="field"><label>Min length (s)</label><input type="number" data-s="min_len" min="10" max="170"></div>
+          <div class="field"><label>Max length (s)</label><input type="number" data-s="max_len" min="15" max="180"></div>
+          <div class="field"><label>Whisper model</label>
+            <select data-s="whisper_model"><option>tiny</option><option>base</option><option>small</option><option>medium</option><option>large-v3</option></select></div>
+          <div class="field"><label>Spoken language</label>
+            <select data-s="language"><option value="auto">Auto-detect</option><option>en</option><option>ja</option><option>de</option><option>fr</option><option>es</option><option>pt</option><option>it</option><option>nl</option><option>pl</option><option>ru</option><option>tr</option><option>ko</option><option>zh</option></select></div>
+        </div>
+      </div>
+      <div class="card">
+        <h3>Format</h3>
+        <div class="formats">
+          <label class="fmt" data-f="fit"><input type="radio" name="format" value="fit" data-s="format"><span class="ph fit"></span><span><b>Fit + blurred</b><small>Full width, blurred zoomed copy fills top and bottom</small></span></label>
+          <label class="fmt" data-f="fill"><input type="radio" name="format" value="fill" data-s="format"><span class="ph fill"></span><span><b>Fill height</b><small>Zoomed so the whole height is filled (sides cropped)</small></span></label>
+        </div>
+        <div class="ctl" id="cropRow" style="margin-top:12px;max-width:520px"><span class="lbl">Crop position</span><input type="range" data-s="crop_x" min="0" max="100"><span class="val" data-val="crop_x"></span></div>
+      </div>
+      <div class="nav"><button data-go="1">&larr; Back</button><button class="primary" data-go="3">Next: Style &rarr;</button></div>
+    </section>
+
+    <!-- 3 STYLE -->
+    <section class="panel hidden" data-p="3">
+      <h2>Subtitle style</h2><p class="lead">Preview on the right uses the same renderer as the final video.</p>
+      <div class="card"><h3>Subtitles</h3><div id="styler"></div></div>
+      <div class="nav"><button data-go="2">&larr; Back</button><button class="primary" data-go="4">Next: Effects &rarr;</button></div>
+    </section>
+
+    <!-- 4 EFFECTS -->
+    <section class="panel hidden" data-p="4">
+      <h2>Effects</h2><p class="lead">Retention boosters. Each one is optional; research suggests a new beat (zoom, text, sound) every 2&ndash;5 seconds and a hook in the first 2 seconds.</p>
+      <div class="fxgrid" id="fxgrid"></div>
+      <div class="nav" style="margin-top:16px"><button data-go="3">&larr; Back</button><button class="primary" data-go="5">Next: Process &rarr;</button></div>
+    </section>
+
+    <!-- 5 PROCESS -->
+    <section class="panel hidden" data-p="5">
+      <h2>Process</h2><p class="lead">Transcribe, find the viral moments, cut, add subtitles and effects, render.</p>
+      <div class="card">
+        <div class="row" style="align-items:center">
+          <button class="primary" id="btnStart">Start processing</button>
+          <button class="danger hidden" id="btnCancel">Cancel</button>
+          <span class="note" id="runNote"></span>
+        </div>
+        <div class="steps" id="stepCards"></div>
+        <div class="bar"><i id="overall"></i></div>
+      </div>
+      <div class="card">
+        <h3>Results</h3>
+        <div class="note" id="folderNote" style="margin:0 0 12px"></div>
+        <div class="shorts" id="shorts"></div>
+      </div>
+      <div class="nav"><button data-go="4">&larr; Back</button><span></span></div>
+    </section>
+  </main>
+
+  <aside>
+    <div class="phone"><img id="preview" alt="Preview"></div>
+    <div class="note">Sample text on a frame of your video. Zoom, whoosh and fades are applied in the final render only.</div>
+  </aside>
+</div>
+<div id="toast"></div>
+
+<script>
+const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
+const PIPE = {ingest:'Source', transcribe:'Transcribe', analyze:'Find viral moments', cut:'Cut clips', subtitles:'Subtitles', render:'Render + effects'};
+const STEPS = ['Source', 'Shorts', 'Style', 'Effects', 'Process'];
+const STYLE_FIELDS = [
+  {k:'style.font', label:'Font', type:'font'},
+  {k:'style.size', label:'Size', type:'range', min:30, max:150, step:2},
+  {k:'style.bold', label:'Bold', type:'check'},
+  {k:'style.uppercase', label:'UPPERCASE', type:'check'},
+  {k:'style.primary', label:'Text color', type:'color'},
+  {k:'style.highlight_words', label:'Highlight spoken word', type:'check'},
+  {k:'style.highlight', label:'Highlight color', type:'color'},
+  {k:'style.words_per_line', label:'Words per line', type:'range', min:1, max:6, step:1},
+  {k:'style.outline', label:'Outline width', type:'range', min:0, max:14, step:1},
+  {k:'style.outline_color', label:'Outline color', type:'color'},
+  {k:'style.shadow', label:'Drop shadow', type:'range', min:0, max:14, step:1},
+  {k:'style.shadow_color', label:'Shadow color', type:'color'},
+  {k:'style.shadow_opacity', label:'Shadow opacity', type:'range', min:0, max:100, step:5},
+  {k:'style.y_percent', label:'Vertical position', type:'range', min:20, max:90, step:1},
+];
+const FX = [
+  {id:'intro', title:'Whoosh + blend-in intro', desc:'The short opens with a whoosh while the picture blends in.', toggle:'effects.intro.enabled', controls:[
+    {k:'effects.intro.style', label:'Blend style', type:'select', opts:[['zoom','Zoom + fade'],['fade','Fade from black'],['flash','White flash']]},
+    {k:'effects.intro.duration', label:'Blend length (s)', type:'range', min:0.2, max:1.5, step:0.1},
+    {k:'effects.intro.whoosh', label:'Whoosh sound', type:'check'},
+    {k:'effects.intro.whoosh_volume', label:'Whoosh volume', type:'range', min:10, max:100, step:5}]},
+  {id:'hook', title:'Hook title card', desc:'AI-written 3-6 word text pops in at the start to stop the swipe.', toggle:'effects.hook.enabled', controls:[
+    {k:'effects.hook.duration', label:'Show for (s)', type:'range', min:1, max:5, step:0.5},
+    {k:'effects.hook.size', label:'Size', type:'range', min:50, max:150, step:2},
+    {k:'effects.hook.color', label:'Color', type:'color'},
+    {k:'effects.hook.y_percent', label:'Vertical position', type:'range', min:8, max:50, step:1}]},
+  {id:'zoom', title:'Punch-in zooms', desc:'Quick zoom on the funniest or loudest moments (AI picks + loudness peaks).', toggle:'effects.zoom.enabled', controls:[
+    {k:'effects.zoom.strength', label:'Strength (%)', type:'range', min:4, max:20, step:1},
+    {k:'effects.zoom.max_per_short', label:'Max per short', type:'range', min:1, max:5, step:1},
+    {k:'effects.zoom.sfx', label:'Thud sound on zoom', type:'check'}]},
+  {id:'loop', title:'Loop-friendly ending', desc:'Fades picture and sound at the end so it flows back into the start.', toggle:'effects.loop.enabled', controls:[
+    {k:'effects.loop.fade', label:'Fade length (s)', type:'range', min:0.2, max:1, step:0.1}]},
+  {id:'trim', title:'Trim silences', desc:'Cuts pauses with no speech and no game sound. Shorts can end up shorter than your minimum length.', toggle:'effects.trim.enabled', controls:[
+    {k:'effects.trim.min_pause', label:'Shortest pause (s)', type:'range', min:0.4, max:2, step:0.1}]},
+  {id:'audio', title:'Normalize loudness', desc:'Evens out voice vs game volume to a standard level.', toggle:'effects.audio.normalize', controls:[]},
+  {id:'metadata', title:'AI upload text', desc:'Title, description and hashtags for every short, saved as a .txt next to it.', toggle:'effects.metadata.enabled', controls:[]},
+];
+let P = null, cfg = null, poll = null, saveT = null, prevT = null, prevSeq = 0, prevUrl = null, saving = Promise.resolve(), cur = 1;
+
+function toast(msg, err) {
+  const t = $('#toast'); t.textContent = msg; t.className = err ? 'err' : ''; t.style.display = 'block';
+  clearTimeout(toast.t); toast.t = setTimeout(() => t.style.display = 'none', err ? 7000 : 3500);
+}
+async function api(url, opts = {}) {
+  const r = await fetch(url, opts);
+  if (!r.ok) { let m = r.statusText; try { m = (await r.json()).error || m; } catch (e) {} throw new Error(m); }
+  return (r.headers.get('content-type') || '').includes('json') ? r.json() : r;
+}
+const jpost = (url, body, method = 'POST') => api(url, {method, headers:{'Content-Type':'application/json'}, body: JSON.stringify(body)});
+function el(tag, attrs = {}, ...kids) {
+  const e = document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs)) { if (k === 'class') e.className = v; else e.setAttribute(k, v); }
+  for (const c of kids) e.append(c);
+  return e;
+}
+const mmss = s => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, '0')}`;
+const getPath = (o, p) => p.split('.').reduce((a, k) => (a == null ? a : a[k]), o);
+function setPath(o, p, v) { const ks = p.split('.'); let a = o; ks.slice(0, -1).forEach(k => a = a[k] = a[k] || {}); a[ks.at(-1)] = v; }
+
+/* ---------- build controls ---------- */
+function control(f) {
+  const row = el('div', {class: 'ctl' + (f.type === 'check' ? ' check' : f.type === 'select' ? ' sel' : f.type === 'font' || f.type === 'color' ? ' col' : '')}, el('span', {class:'lbl'}, f.label));
+  let inp;
+  if (f.type === 'font') inp = el('input', {type:'text', list:'fonts'});
+  else if (f.type === 'range') inp = el('input', {type:'range', min:f.min, max:f.max, step:f.step});
+  else if (f.type === 'check') inp = el('input', {type:'checkbox'});
+  else if (f.type === 'select') { inp = el('select'); f.opts.forEach(([v, t]) => inp.append(el('option', {value:v}, t))); }
+  else inp = el('input', {type:'color'});
+  inp.dataset.s = f.k; row.append(inp);
+  if (f.type === 'range') row.append(el('span', {class:'val', 'data-val':f.k}));
+  return row;
+}
+function buildUi() {
+  const nav = $('#steps');
+  STEPS.forEach((t, i) => nav.append(el('button', {class:'st', 'data-step':i + 1}, el('span', {class:'n'}, String(i + 1)), t)));
+  const dl = el('datalist', {id:'fonts'}); cfg.fonts.forEach(f => dl.append(el('option', {value:f}))); document.body.append(dl);
+  STYLE_FIELDS.forEach(f => $('#styler').append(control(f)));
+  for (const fx of FX) {
+    const head = el('label', {class:'fxh'}, el('input', {type:'checkbox', 'data-s':fx.toggle}), el('div', {}, el('b', {}, fx.title), el('span', {}, fx.desc)));
+    const card = el('div', {class:'fx', 'data-fx':fx.toggle}, head);
+    if (fx.controls.length) { const sub = el('div', {class:'sub'}); fx.controls.forEach(c => sub.append(control(c))); card.append(sub); }
+    $('#fxgrid').append(card);
+  }
+  document.body.addEventListener('input', e => { if (e.target.dataset && e.target.dataset.s !== undefined) onChange(); });
+  document.body.addEventListener('change', e => { if (e.target.dataset && e.target.dataset.s !== undefined) onChange(); });
+  nav.addEventListener('click', e => { const b = e.target.closest('.st'); if (b && !b.disabled) goStep(+b.dataset.step); });
+  $$('[data-go]').forEach(b => b.onclick = () => goStep(+b.dataset.go));
+}
+function goStep(n) {
+  cur = n;
+  $$('.panel').forEach(p => p.classList.toggle('hidden', +p.dataset.p !== n));
+  $$('.st').forEach(b => { const i = +b.dataset.step; b.classList.toggle('on', i === n); b.disabled = !P && i > 1; });
+  $('#shell').classList.toggle('noaside', !(P && n >= 2 && n <= 4));
+  window.scrollTo({top: 0});
+  if (P && n >= 2 && n <= 4) schedulePreview();
+}
+
+/* ---------- settings <-> controls ---------- */
+function fillControls() {
+  for (const e of $$('[data-s]')) {
+    const v = getPath(P.settings, e.dataset.s);
+    if (e.type === 'radio') e.checked = (e.value === v);
+    else if (e.type === 'checkbox') e.checked = !!v;
+    else if (e.id === 'model') { e.replaceChildren(el('option', {value: v || ''}, v || '(click "Load models")')); e.value = v || ''; }
+    else e.value = v;
+  }
+  syncLabels();
+}
+function syncLabels() {
+  for (const e of $$('[data-s]')) { const v = document.querySelector(`[data-val="${e.dataset.s}"]`); if (v) v.textContent = e.value; }
+  const f = (document.querySelector('input[name=format]:checked') || {}).value;
+  $$('.fmt').forEach(x => x.classList.toggle('sel', x.dataset.f === f));
+  $('#cropRow').classList.toggle('hidden', f !== 'fill');
+  $$('.fx').forEach(x => x.classList.toggle('on', x.querySelector('[data-s]').checked));
+}
+function readSettings() {
+  const s = {};
+  for (const e of $$('[data-s]')) {
+    if (e.type === 'radio' && !e.checked) continue;
+    const v = e.type === 'checkbox' ? e.checked : (e.type === 'number' || e.type === 'range') ? Number(e.value) : e.value;
+    setPath(s, e.dataset.s, v);
+  }
+  if (s.max_len <= s.min_len) s.max_len = s.min_len + 5;
+  return s;
+}
+function onChange() {
+  if (!P || P.running) return;
+  syncLabels();
+  clearTimeout(saveT); saveT = setTimeout(saveSettings, 500);
+  schedulePreview();
+}
+function saveSettings() {
+  if (!P || P.running) return saving;
+  saving = jpost(`/api/projects/${P.id}/settings`, readSettings(), 'PATCH').then(r => {
+    P = {...P, ...r.project};
+    if (r.reset_from) toast(`Settings changed: will redo from "${PIPE[r.reset_from]}"`);
+    render();
+  }).catch(e => toast(e.message, true));
+  return saving;
+}
+
+/* ---------- preview ---------- */
+function schedulePreview() { clearTimeout(prevT); prevT = setTimeout(loadPreview, 350); }
+async function loadPreview() {
+  if (!P || cur < 2 || cur > 4) return;
+  const seq = ++prevSeq, s = readSettings(), img = $('#preview');
+  img.classList.add('busy');
+  try {
+    const r = await jpost(`/api/projects/${P.id}/preview`, {style: s.style, format: s.format, crop_x: s.crop_x, hook: s.effects.hook});
+    const blob = await r.blob();
+    if (seq !== prevSeq) return;
+    if (prevUrl) URL.revokeObjectURL(prevUrl);
+    prevUrl = URL.createObjectURL(blob); img.src = prevUrl;
+  } catch (e) { if (seq === prevSeq) toast('Preview: ' + e.message, true); }
+  finally { if (seq === prevSeq) img.classList.remove('busy'); }
+}
+
+/* ---------- projects ---------- */
+async function loadList() {
+  const list = await api('/api/projects');
+  const sel = $('#projList'); sel.replaceChildren();
+  if (!list.length) sel.append(el('option', {value:''}, '(no projects yet)'));
+  list.reverse().forEach(p => sel.append(el('option', {value:p.id}, `${p.name} - ${p.state} (${p.updated.replace('T', ' ')})`)));
+}
+async function createProject() {
+  const fd = new FormData(); fd.append('name', $('#pName').value);
+  const file = $('#pFile').files[0];
+  if (file) fd.append('file', file); else fd.append('path', $('#pPath').value);
+  const b = $('#btnCreate'); b.disabled = true; b.textContent = 'Uploading...';
+  try { openProject(await api('/api/projects', {method:'POST', body:fd})); loadList(); }
+  catch (e) { toast(e.message, true); }
+  finally { b.disabled = false; b.textContent = 'Create project'; }
+}
+async function openFromList() {
+  const id = $('#projList').value; if (!id) return;
+  try { openProject(await api('/api/projects/' + id)); } catch (e) { toast(e.message, true); }
+}
+async function openFromJson() {
+  const f = $('#pJson').files[0]; if (!f) return;
+  const fd = new FormData(); fd.append('file', f);
+  try { openProject(await api('/api/projects/open', {method:'POST', body:fd})); } catch (e) { toast(e.message, true); }
+  $('#pJson').value = '';
+}
+function openProject(data) {
+  P = data;
+  $('#hdrProject').classList.remove('hidden'); $('#hdrName').textContent = P.name;
+  $('#newBox').classList.add('hidden'); $('#resumeBox').classList.add('hidden'); $('#currentBox').classList.remove('hidden');
+  const s = P.source;
+  $('#curName').textContent = P.name;
+  $('#curInfo').textContent = `${s.original_name || ''} - ${s.width}x${s.height}, ${mmss(s.duration)} - folder: projects/${P.id}/`;
+  $('#folderNote').textContent = `Every step is saved in projects/${P.id}/ (01_source ... 06_shorts). Resume any time with its project.json.`;
+  fillControls(); render();
+  const allDone = Object.values(P.steps).every(x => x.status === 'done');
+  goStep(P.running || allDone || P.shorts.length ? 5 : 2);
+  if (P.running) startPolling();
+}
+function closeProject() {
+  stopPolling(); P = null;
+  $('#hdrProject').classList.add('hidden');
+  $('#newBox').classList.remove('hidden'); $('#resumeBox').classList.remove('hidden'); $('#currentBox').classList.add('hidden');
+  loadList(); goStep(1);
+}
+
+/* ---------- API key / models ---------- */
+const saveKey = key => jpost('/api/prefs', {api_key: key}).catch(e => toast(e.message, true));
+function forgetKey() { $('#apiKey').value = ''; saveKey('').then(() => toast('Saved key removed')); }
+async function loadModels() {
+  const key = $('#apiKey').value.trim();
+  if (!key) return toast('Enter your Gemini API key first', true);
+  await saveKey(key);
+  const b = $('#btnModels'); b.textContent = 'Loading...';
+  try {
+    const {models} = await jpost('/api/models', {api_key: key});
+    const m = $('#model'), curv = m.value; m.replaceChildren();
+    models.forEach(n => m.append(el('option', {value:n}, n)));
+    m.value = models.includes(curv) ? curv : (models.find(n => n === 'gemini-3.8-flash') || models[0] || '');
+    toast(`${models.length} models loaded`); onChange();
+  } catch (e) { toast(e.message, true); }
+  finally { b.textContent = 'Load models'; }
+}
+
+/* ---------- running ---------- */
+async function start() {
+  const key = $('#apiKey').value.trim();
+  if (key) await saveKey(key);
+  await saveSettings();
+  if (P.steps.analyze.status !== 'done') {
+    if (!key && !(await api('/api/prefs')).api_key) { goStep(2); return toast('Enter your Gemini API key', true); }
+    if (!P.settings.gemini_model) { goStep(2); return toast('Load and select a Gemini model', true); }
+  }
+  try { await jpost(`/api/projects/${P.id}/start`, {api_key: key}); P.running = true; render(); startPolling(); }
+  catch (e) { toast(e.message, true); }
+}
+const cancel = () => jpost(`/api/projects/${P.id}/cancel`, {}).then(() => toast('Cancelling...')).catch(e => toast(e.message, true));
+function startPolling() { stopPolling(); poll = setInterval(tick, 1200); }
+function stopPolling() { clearInterval(poll); poll = null; }
+async function tick() {
+  try {
+    P = await api('/api/projects/' + P.id); render();
+    if (!P.running) { stopPolling(); toast(P.state === 'done' ? 'All shorts are ready' : 'Stopped: ' + P.state, P.state === 'error'); }
+  } catch (e) { stopPolling(); toast(e.message, true); }
+}
+
+/* ---------- render ---------- */
+function render() {
+  if (!P) return;
+  const run = !!P.running;
+  $$('[data-s]').forEach(e => e.disabled = run);
+  $('#btnCancel').classList.toggle('hidden', !run);
+  const allDone = Object.values(P.steps).every(s => s.status === 'done');
+  const b = $('#btnStart');
+  b.disabled = run || allDone;
+  b.textContent = run ? 'Running...' : allDone ? 'All done' : (['interrupted', 'error', 'cancelled'].includes(P.state) ? 'Resume' : 'Start processing');
+  $('#runNote').textContent = allDone ? 'Change style, effects or format in the earlier steps to re-render only what is needed.' : '';
+  const box = $('#stepCards'); box.replaceChildren();
+  let total = 0;
+  for (const [k, label] of Object.entries(PIPE)) {
+    const s = P.steps[k];
+    total += s.status === 'done' ? 1 : (s.status === 'running' ? s.progress : 0);
+    box.append(el('div', {class:'step ' + s.status}, el('div', {class:'nm'}, label), el('div', {class:'m'}, s.message || '')));
+  }
+  $('#overall').style.width = Math.round(total / 6 * 100) + '%';
+  $$('.st').forEach(x => { const i = +x.dataset.step; x.disabled = !P && i > 1; x.classList.toggle('done', !!P && ((i === 1) || (i === 5 && allDone))); });
+  renderShorts();
+}
+async function copyText(t, btn) {
+  try { await navigator.clipboard.writeText(t); const o = btn.textContent; btn.textContent = 'Copied'; setTimeout(() => btn.textContent = o, 1200); }
+  catch (e) { toast('Copy failed - select the text manually', true); }
+}
+function renderShorts() {
+  const box = $('#shorts'); box.replaceChildren();
+  for (const s of P.shorts) {
+    const n = String(s.index).padStart(2, '0'), base = `/files/${P.id}`;
+    const card = el('div', {class:'short'}, el('h4', {}, `#${s.index} ${s.title}`));
+    const len = s.plan ? s.plan.out_dur : s.end - s.start;
+    card.append(el('div', {class:'meta'}, `${mmss(s.start)} - ${mmss(s.end)} - ${Math.round(len)}s - score ${s.score}`));
+    if (s.hook) card.append(el('span', {class:'chip'}, 'Hook: ' + s.hook));
+    if (s.render === 'done') {
+      card.append(el('video', {controls:'', preload:'metadata', src:`${base}/06_shorts/short_${n}.mp4?v=${encodeURIComponent(P.updated)}`}));
+      const acts = el('div', {class:'acts'},
+        el('a', {href:`${base}/06_shorts/short_${n}.mp4`, download:`short_${n}.mp4`}, 'Download'),
+        el('a', {href:`${base}/05_subtitles/short_${n}.srt`, download:`short_${n}.srt`}, 'Subtitles'));
+      const tags = (s.hashtags || []).map(t => t.startsWith('#') ? t : '#' + t).join(' ');
+      [['Copy title', s.title], ['Copy description', s.description], ['Copy hashtags', tags]].forEach(([l, t]) => {
+        if (t) { const c = el('button', {}, l); c.onclick = () => copyText(t, c); acts.append(c); }
+      });
+      card.append(acts);
+    }
+    if (s.description) card.append(el('div', {class:'why'}, s.description));
+    else card.append(el('div', {class:'why'}, s.reason || ''));
+    const badges = el('div', {class:'badges'});
+    for (const k of ['cut', 'subtitles', 'render']) badges.append(el('span', {class: s[k]}, `${k}: ${s[k]}`));
+    card.append(badges);
+    box.append(card);
+  }
+}
+
+/* ---------- wiring ---------- */
+async function init() {
+  cfg = await api('/api/config');
+  buildUi();
+  $('#btnCreate').onclick = createProject;
+  $('#btnOpenList').onclick = openFromList;
+  $('#pJson').onchange = openFromJson;
+  $('#btnClose').onclick = closeProject;
+  $('#btnModels').onclick = loadModels;
+  $('#btnForget').onclick = forgetKey;
+  $('#btnStart').onclick = start;
+  $('#btnCancel').onclick = cancel;
+  $('#apiKey').addEventListener('change', e => { if (e.target.value.trim()) saveKey(e.target.value.trim()); });
+  try { $('#apiKey').value = (await api('/api/prefs')).api_key || ''; } catch (e) {}
+  await loadList();
+  goStep(1);
+}
+init().catch(e => toast(e.message, true));
+</script>
+</body>
+</html>

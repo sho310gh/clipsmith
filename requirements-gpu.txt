@@ -1,0 +1,4 @@
+# Optional, NVIDIA GPU only (much faster transcription). Needs a recent NVIDIA driver (CUDA 12).
+# Install inside the tool's venv:  pip install -r requirements-gpu.txt   (large download, ~1 GB)
+nvidia-cublas-cu12
+nvidia-cudnn-cu12==9.*

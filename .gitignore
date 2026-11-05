@@ -1,0 +1,7 @@
+projects/
+user_prefs.json
+sfx/
+STATUS.md
+__pycache__/
+*.pyc
+.venv/
